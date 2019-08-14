@@ -34,4 +34,7 @@ dependencies {
     def room_version = "2.0.0"
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+
+    implementation 'de.hdodenhof:circleimageview:3.0.0'
+    implementation 'com.theartofdev.edmodo:android-image-cropper:2.7.+'
 }

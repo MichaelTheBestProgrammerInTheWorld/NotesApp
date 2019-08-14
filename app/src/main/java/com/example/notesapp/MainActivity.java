@@ -79,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(AddEditNoteActivity.EXTRA_TITLE, note.getTitle());
                 intent.putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION, note.getDescription());
                 intent.putExtra(AddEditNoteActivity.EXTRA_PRIORITY, note.getPriority());
+                intent.putExtra(AddEditNoteActivity.EXTRA_IMAGE, note.getImage());
                 startActivityForResult(intent, EDIT_NOTE_REQUEST);
             }
         });
@@ -92,8 +93,9 @@ public class MainActivity extends AppCompatActivity {
             String title = data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
             String description = data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
             int priority = data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
+            byte[] image = data.getByteArrayExtra(AddEditNoteActivity.EXTRA_IMAGE);
 
-            Note note = new Note(title, description, priority);
+            Note note = new Note(title, description, priority, image);
             noteViewModel.insert(note);
             Toast.makeText(this, "Note Saved", Toast.LENGTH_SHORT).show();
         } else if (requestCode == EDIT_NOTE_REQUEST && resultCode == RESULT_OK) {
@@ -105,8 +107,10 @@ public class MainActivity extends AppCompatActivity {
             String title = data.getStringExtra(AddEditNoteActivity.EXTRA_TITLE);
             String description = data.getStringExtra(AddEditNoteActivity.EXTRA_DESCRIPTION);
             int priority = data.getIntExtra(AddEditNoteActivity.EXTRA_PRIORITY, 1);
+            byte[] image = data.getByteArrayExtra(AddEditNoteActivity.EXTRA_IMAGE);
 
-            Note note = new Note(title, description, priority);
+
+            Note note = new Note(title, description, priority, image);
             note.setId(id);
             noteViewModel.update(note);
             Toast.makeText(this, "Note Updated", Toast.LENGTH_SHORT).show();
