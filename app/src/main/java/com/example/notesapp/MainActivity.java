@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.notesapp.user.SignInActivity;
+import com.example.notesapp.user.SignUpActivity;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
@@ -132,6 +134,16 @@ public class MainActivity extends AppCompatActivity {
             case R.id.delete_all_notes:
                 noteViewModel.deleteAllNotes();
                 Toast.makeText(this, "All Notes are Deleted", Toast.LENGTH_SHORT).show();
+                return true;
+            case R.id.sign_up:
+                Intent signUpIntent = new Intent(this, SignUpActivity.class);
+                startActivity(signUpIntent);
+                return true;
+            case R.id.sign_in:
+                Intent signInIntent = new Intent(this, SignInActivity.class);
+                startActivity(signInIntent);
+                return true;
+            case R.id.sign_out:
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

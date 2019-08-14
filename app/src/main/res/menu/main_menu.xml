@@ -7,4 +7,19 @@
         android:title="Delete All Notes"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/sign_up"
+        android:title="Sign Up"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/sign_in"
+        android:title="Sign In"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/sign_out"
+        android:title="Sign Out"
+        app:showAsAction="never" />
+
 </menu>
