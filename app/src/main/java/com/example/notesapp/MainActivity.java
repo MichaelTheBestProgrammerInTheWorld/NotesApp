@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,18 +29,26 @@ public class MainActivity extends AppCompatActivity {
     private NoteViewModel noteViewModel;
     public static final int ADD_NOTE_REQUEST = 1;
     public static final int EDIT_NOTE_REQUEST = 2;
+    SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        checkIfSignedIn();
+
         FloatingActionButton buttonAddNote = findViewById(R.id.button_add_note);
         buttonAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
-                startActivityForResult(intent, ADD_NOTE_REQUEST);
+                if (checkIfSignedIn()) {
+                    Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
+                    startActivityForResult(intent, ADD_NOTE_REQUEST);
+                } else {
+                    Toast.makeText(MainActivity.this, "please sign in to add note", Toast.LENGTH_SHORT).show();
+                }
+
             }
         });
 
@@ -58,31 +67,40 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
-                ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
-            @Override
-            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
-                return false;
-            }
+            new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,
+                    ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT) {
+                @Override
+                public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                    return false;
+                }
+                @Override
+                public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
 
-            @Override
-            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                    noteViewModel.delete(adapter.getNoteAt(viewHolder.getAdapterPosition()));
+                    Toast.makeText(MainActivity.this, "Note Deleted", Toast.LENGTH_SHORT).show();
+                }
+                @Override
+                public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                    if (!checkIfSignedIn()) return 0;
+                    return super.getSwipeDirs(recyclerView, viewHolder);
+                }
+            }).attachToRecyclerView(recyclerView);
 
-                noteViewModel.delete(adapter.getNoteAt(viewHolder.getAdapterPosition()));
-                Toast.makeText(MainActivity.this, "Note Deleted", Toast.LENGTH_SHORT).show();
-            }
-        }).attachToRecyclerView(recyclerView);
 
         adapter.setOnItemClickListener(new NoteAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Note note) {
-                Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
-                intent.putExtra(AddEditNoteActivity.EXTRA_ID, note.getId());
-                intent.putExtra(AddEditNoteActivity.EXTRA_TITLE, note.getTitle());
-                intent.putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION, note.getDescription());
-                intent.putExtra(AddEditNoteActivity.EXTRA_PRIORITY, note.getPriority());
-                intent.putExtra(AddEditNoteActivity.EXTRA_IMAGE, note.getImage());
-                startActivityForResult(intent, EDIT_NOTE_REQUEST);
+                if (checkIfSignedIn()) {
+                    Intent intent = new Intent(MainActivity.this, AddEditNoteActivity.class);
+                    intent.putExtra(AddEditNoteActivity.EXTRA_ID, note.getId());
+                    intent.putExtra(AddEditNoteActivity.EXTRA_TITLE, note.getTitle());
+                    intent.putExtra(AddEditNoteActivity.EXTRA_DESCRIPTION, note.getDescription());
+                    intent.putExtra(AddEditNoteActivity.EXTRA_PRIORITY, note.getPriority());
+                    intent.putExtra(AddEditNoteActivity.EXTRA_IMAGE, note.getImage());
+                    startActivityForResult(intent, EDIT_NOTE_REQUEST);
+                } else {
+
+                }
             }
         });
     }
@@ -132,8 +150,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.delete_all_notes:
-                noteViewModel.deleteAllNotes();
-                Toast.makeText(this, "All Notes are Deleted", Toast.LENGTH_SHORT).show();
+                if (checkIfSignedIn()) {
+                    noteViewModel.deleteAllNotes();
+                    Toast.makeText(this, "All Notes are Deleted", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "please sign in to delete notes", Toast.LENGTH_SHORT).show();
+                }
+
                 return true;
             case R.id.sign_up:
                 Intent signUpIntent = new Intent(this, SignUpActivity.class);
@@ -144,9 +167,24 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(signInIntent);
                 return true;
             case R.id.sign_out:
+                preferences = getSharedPreferences("SignedIn", MODE_PRIVATE);
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.clear().commit();
+                Toast.makeText(this, "you are signed out", Toast.LENGTH_SHORT).show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private boolean checkIfSignedIn() {
+
+        preferences = getApplicationContext().getSharedPreferences("SignedIn", MODE_PRIVATE);
+        String isSignedIN = preferences.getString("isSignedIN", null);
+        if (isSignedIN != null) {
+            return true;
+        } else {
+            return false;
         }
     }
 }
