@@ -31,10 +31,13 @@ public class UserViewModel extends AndroidViewModel {
 
     public interface SignUpkListener {
         void isNewUser();
+
         void isNotNewUser();
     }
 
     public void setOnSignUpListener(SignUpkListener listener) {
         this.listener = listener;
     }
+
+
 }
